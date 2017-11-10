@@ -268,6 +268,18 @@ defmodule Ecto.Integration.AssocTest do
     post = TestRepo.get!(from(Post, preload: [:update_permalink]), post.id)
     refute post.update_permalink
 
+    # Replacing with map (on_replace: :update)
+    changeset =
+      post
+      |> Ecto.Changeset.change
+      |> Ecto.Changeset.put_assoc(:update_permalink, %{url: "3"})
+    post = TestRepo.update!(changeset)
+    assert post.update_permalink.id == perma.id
+    assert post.update_permalink.post_id == post.id
+    assert post.update_permalink.url == "3"
+    post = TestRepo.get!(from(Post, preload: [:update_permalink]), post.id)
+    assert post.update_permalink.url == "3"
+
     assert [1] == TestRepo.all(from(p in Permalink, select: count(p.id)))
   end
 
